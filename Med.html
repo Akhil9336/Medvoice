@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediVoice AI — Smart Medical Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --surface3: #1f2d45;
+    --border: rgba(99,179,237,0.15);
+    --border2: rgba(99,179,237,0.3);
+    --accent: #38bdf8;
+    --accent2: #0ea5e9;
+    --accent3: #7dd3fc;
+    --green: #34d399;
+    --red: #f87171;
+    --amber: #fbbf24;
+    --purple: #a78bfa;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #4a5568;
+    --pulse: #38bdf8;
+    --font-sans: 'DM Sans', sans-serif;
+    --font-serif: 'DM Serif Display', serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* Animated background mesh */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 20%, rgba(56,189,248,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 60% at 80% 80%, rgba(167,139,250,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(52,211,153,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Header */
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    border-bottom: 0.5px solid var(--border);
+    backdrop-filter: blur(8px);
+    background: rgba(10,15,30,0.7);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent2), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-icon svg { width: 20px; height: 20px; }
+
+  .logo-text {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  .header-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 20px;
+    padding: 0.35rem 0.85rem;
+  }
+
+  .header-badge .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* Main layout */
+  main {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 0;
+    height: calc(100vh - 68px);
+  }
+
+  /* Sidebar */
+  aside {
+    border-right: 0.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .api-section {
+    padding: 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+  }
+
+  .api-input-wrap {
+    position: relative;
+  }
+
+  .api-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 2.5rem 0.65rem 0.9rem;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .api-input:focus { border-color: var(--accent2); }
+
+  .eye-toggle {
+    position: absolute;
+    right: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    padding: 2px;
+  }
+
+  .lang-select-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .lang-select {
+    width: 100%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 0.9rem;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    padding-right: 2.5rem;
+  }
+
+  .lang-select:focus { border-color: var(--accent2); }
+
+  /* History panel */
+  .history-section {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+  }
+
+  .history-section::-webkit-scrollbar { width: 4px; }
+  .history-section::-webkit-scrollbar-track { background: transparent; }
+  .history-section::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  .history-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-dim);
+  }
+
+  .history-empty svg { opacity: 0.3; margin-bottom: 1rem; }
+
+  .history-item {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem;
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .history-item:hover { border-color: var(--border2); background: var(--surface3); }
+
+  .history-item-time {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 0.3rem;
+  }
+
+  .history-item-symptom {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Main content */
+  .content-area {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Mic zone */
+  .mic-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
+    border-bottom: 0.5px solid var(--border);
+    gap: 1.5rem;
+    min-height: 300px;
+    position: relative;
+  }
+
+  .mic-status-text {
+    font-size: 14px;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+  }
+
+  /* Pulse rings */
+  .mic-btn-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pulse-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .pulse-ring-1 { width: 90px; height: 90px; }
+  .pulse-ring-2 { width: 120px; height: 120px; }
+  .pulse-ring-3 { width: 150px; height: 150px; }
+
+  .recording .pulse-ring-1 { animation: pulse-out 2s 0s infinite; }
+  .recording .pulse-ring-2 { animation: pulse-out 2s 0.4s infinite; }
+  .recording .pulse-ring-3 { animation: pulse-out 2s 0.8s infinite; }
+
+  @keyframes pulse-out {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  .mic-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1.5px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    z-index: 2;
+  }
+
+  .mic-btn:hover {
+    border-color: var(--accent);
+    background: var(--surface3);
+    transform: scale(1.05);
+  }
+
+  .mic-btn.active {
+    background: rgba(56,189,248,0.15);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(56,189,248,0.2);
+  }
+
+  .mic-btn svg { transition: transform 0.2s; }
+  .mic-btn.active svg { transform: scale(1.1); }
+
+  /* Waveform visualizer */
+  .waveform-wrap {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 40px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .waveform-wrap.visible { opacity: 1; }
+
+  .wave-bar {
+    width: 3px;
+    background: var(--accent);
+    border-radius: 3px;
+    height: 6px;
+    transition: height 0.1s;
+  }
+
+  /* Transcript */
+  .transcript-box {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    min-height: 60px;
+    width: 100%;
+    max-width: 600px;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+
+  .transcript-box.has-text {
+    color: var(--text);
+    font-style: normal;
+    border-color: var(--border2);
+    text-align: left;
+  }
+
+  /* Action buttons */
+  .action-row {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 0.5px solid;
+  }
+
+  .btn-primary {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: #fff;
+  }
+
+  .btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
+
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+  /* Results panel */
+  .results-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.75rem 2rem;
+  }
+
+  .results-area::-webkit-scrollbar { width: 4px; }
+  .results-area::-webkit-scrollbar-track { background: transparent; }
+  .results-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 1rem;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .empty-state svg { opacity: 0.25; }
+
+  /* Medical result card */
+  .result-card {
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .condition-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(56,189,248,0.1);
+    border: 0.5px solid rgba(56,189,248,0.3);
+    border-radius: 20px;
+    padding: 0.3rem 0.85rem;
+    font-size: 12px;
+    color: var(--accent3);
+    font-weight: 500;
+  }
+
+  .severity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 20px;
+    padding: 0.3rem 0.85rem;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .severity-mild { background: rgba(52,211,153,0.1); border: 0.5px solid rgba(52,211,153,0.3); color: var(--green); }
+  .severity-moderate { background: rgba(251,191,36,0.1); border: 0.5px solid rgba(251,191,36,0.3); color: var(--amber); }
+  .severity-severe { background: rgba(248,113,113,0.1); border: 0.5px solid rgba(248,113,113,0.3); color: var(--red); }
+
+  .result-title {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+    line-height: 1.2;
+  }
+
+  .result-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* Info grid */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+
+  .info-card-full { grid-column: 1 / -1; }
+
+  .info-card-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.85rem;
+  }
+
+  .label-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .label-icon-blue { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .label-icon-green { background: rgba(52,211,153,0.15); color: var(--green); }
+  .label-icon-amber { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .label-icon-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .label-icon-purple { background: rgba(167,139,250,0.15); color: var(--purple); }
+
+  .medicine-list, .precaution-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .medicine-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 0.5px solid var(--border);
+  }
+
+  .med-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: rgba(56,189,248,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+
+  .med-name {
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+
+  .med-dosage {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .precaution-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    padding: 0.5rem 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .precaution-item:last-child { border-bottom: none; }
+
+  .prec-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  /* Disclaimer */
+  .disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: rgba(251,191,36,0.06);
+    border: 0.5px solid rgba(251,191,36,0.2);
+    border-radius: 10px;
+    padding: 1rem;
+    font-size: 12px;
+    color: var(--amber);
+    line-height: 1.6;
+    margin-top: 1rem;
+  }
+
+  /* Loading state */
+  .loading-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+  }
+
+  .loading-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: bounce 1.4s infinite both;
+  }
+
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%,80%,100% { transform: scale(0.7); opacity: 0.4; }
+    40% { transform: scale(1.1); opacity: 1; }
+  }
+
+  /* Language tag */
+  .lang-detected {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(167,139,250,0.1);
+    border: 0.5px solid rgba(167,139,250,0.25);
+    border-radius: 6px;
+    padding: 0.2rem 0.6rem;
+    font-size: 11px;
+    color: var(--purple);
+  }
+
+  /* Streaming text */
+  .streaming-cursor::after {
+    content: '▋';
+    animation: cursor-blink 0.7s infinite;
+    color: var(--accent);
+  }
+
+  @keyframes cursor-blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* Scrollbar */
+  * { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    aside { border-right: none; border-bottom: 0.5px solid var(--border); max-height: 200px; }
+    .mic-zone { padding: 1.5rem; min-height: 220px; }
+    .info-grid { grid-template-columns: 1fr; }
+    header { padding: 1rem 1.25rem; }
+    .results-area { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
+        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/>
+        <path d="M12 8v8M8 12h8"/>
+      </svg>
+    </div>
+    <span class="logo-text">Medi<span>Voice</span></span>
+  </div>
+  <div class="header-badge">
+    <span class="dot"></span>
+    Powered by Gemini 2.5 Flash
+  </div>
+</header>
+
+<main>
+  <!-- Sidebar -->
+  <aside>
+    <div class="api-section">
+      <div class="section-label">Gemini API Key</div>
+      <div class="api-input-wrap">
+        <input type="password" class="api-input" id="apiKey" placeholder="AIza..." autocomplete="off">
+        <button class="eye-toggle" id="eyeToggle" title="Show/hide key">
+          <svg id="eyeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="api-section">
+      <div class="section-label">Language (Optional — auto-detected)</div>
+      <div class="lang-select-wrap">
+        <select class="lang-select" id="langSelect">
+          <option value="">Auto-detect</option>
+          <option value="en">English</option>
+          <option value="hi">Hindi (हिन्दी)</option>
+          <option value="ur">Urdu (اردو)</option>
+          <option value="bn">Bengali (বাংলা)</option>
+          <option value="te">Telugu (తెలుగు)</option>
+          <option value="ta">Tamil (தமிழ்)</option>
+          <option value="mr">Marathi (मराठी)</option>
+          <option value="gu">Gujarati (ગુજરાતી)</option>
+          <option value="kn">Kannada (ಕನ್ನಡ)</option>
+          <option value="ml">Malayalam (മലയാളം)</option>
+          <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+          <option value="ar">Arabic (العربية)</option>
+          <option value="fr">French (Français)</option>
+          <option value="es">Spanish (Español)</option>
+          <option value="zh">Chinese (中文)</option>
+          <option value="de">German (Deutsch)</option>
+          <option value="pt">Portuguese (Português)</option>
+          <option value="ru">Russian (Русский)</option>
+          <option value="ja">Japanese (日本語)</option>
+          <option value="ko">Korean (한국어)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <div class="section-label">Session history</div>
+      <div id="historyList">
+        <div class="history-empty">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <p style="font-size:12px;">No sessions yet</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="content-area">
+    <!-- Mic zone -->
+    <div class="mic-zone" id="micZone">
+      <div class="mic-status-text" id="micStatus">Hold to speak your symptoms</div>
+
+      <div class="mic-btn-wrap" id="micBtnWrap">
+        <div class="pulse-ring pulse-ring-1"></div>
+        <div class="pulse-ring pulse-ring-2"></div>
+        <div class="pulse-ring pulse-ring-3"></div>
+        <button class="mic-btn" id="micBtn" title="Record symptoms">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round">
+            <rect x="9" y="2" width="6" height="11" rx="3"/>
+            <path d="M5 10a7 7 0 0 0 14 0M12 19v3M8 22h8"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="waveform-wrap" id="waveform">
+        <!-- bars injected by JS -->
+      </div>
+
+      <div class="transcript-box" id="transcriptBox">Speak your symptoms in any language...</div>
+
+      <div class="action-row">
+        <button class="btn btn-primary" id="analyzeBtn" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M11 8v6M8 11h6"/></svg>
+          Analyze Symptoms
+        </button>
+        <button class="btn btn-ghost" id="clearBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-area" id="resultsArea">
+      <div class="empty-state" id="emptyState">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        <p style="font-size:15px; font-weight:500; color: var(--text-dim);">Your medical analysis will appear here</p>
+        <p style="font-size:13px; color: var(--text-dim); max-width: 320px; line-height:1.6;">Press the microphone and describe your symptoms in any language. MediVoice will identify conditions, suggest medicines, and provide precautions.</p>
+      </div>
+      <div id="resultContent" style="display:none;"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+const state = {
+  recording: false,
+  mediaRecorder: null,
+  audioChunks: [],
+  transcript: '',
+  history: [],
+  stream: null
+};
+
+// ─── Elements ────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const micBtn = $('micBtn');
+const micBtnWrap = $('micBtnWrap');
+const micStatus = $('micStatus');
+const transcriptBox = $('transcriptBox');
+const analyzeBtn = $('analyzeBtn');
+const clearBtn = $('clearBtn');
+const waveform = $('waveform');
+const resultsArea = $('resultsArea');
+const emptyState = $('emptyState');
+const resultContent = $('resultContent');
+const apiKeyInput = $('apiKey');
+const langSelect = $('langSelect');
+const historyList = $('historyList');
+const eyeToggle = $('eyeToggle');
+
+// ─── Waveform bars ───────────────────────────────────────
+const NUM_BARS = 28;
+for (let i = 0; i < NUM_BARS; i++) {
+  const b = document.createElement('div');
+  b.className = 'wave-bar';
+  waveform.appendChild(b);
+}
+const bars = waveform.querySelectorAll('.wave-bar');
+let waveInterval = null;
+
+function animateWave() {
+  bars.forEach(bar => {
+    const h = Math.floor(Math.random() * 32) + 4;
+    bar.style.height = h + 'px';
+  });
+}
+
+function startWave() {
+  waveform.classList.add('visible');
+  waveInterval = setInterval(animateWave, 100);
+}
+
+function stopWave() {
+  waveform.classList.remove('visible');
+  clearInterval(waveInterval);
+  bars.forEach(b => b.style.height = '6px');
+}
+
+// ─── Eye toggle ──────────────────────────────────────────
+eyeToggle.addEventListener('click', () => {
+  const isPass = apiKeyInput.type === 'password';
+  apiKeyInput.type = isPass ? 'text' : 'password';
+  $('eyeIcon').innerHTML = isPass
+    ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+});
+
+// ─── Recording ───────────────────────────────────────────
+micBtn.addEventListener('mousedown', startRecording);
+micBtn.addEventListener('touchstart', e => { e.preventDefault(); startRecording(); }, { passive: false });
+micBtn.addEventListener('mouseup', stopRecording);
+micBtn.addEventListener('mouseleave', () => { if (state.recording) stopRecording(); });
+micBtn.addEventListener('touchend', stopRecording);
+
+async function startRecording() {
+  if (state.recording) return;
+  if (!navigator.mediaDevices) {
+    showError('Microphone not supported in this browser.');
+    return;
+  }
+  try {
+    state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.audioChunks = [];
+    state.mediaRecorder = new MediaRecorder(state.stream);
+    state.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.audioChunks.push(e.data); };
+    state.mediaRecorder.start(100);
+    state.recording = true;
+    micBtn.classList.add('active');
+    micBtnWrap.classList.add('recording');
+    micStatus.textContent = 'Recording... release to stop';
+    transcriptBox.textContent = 'Listening...';
+    transcriptBox.classList.remove('has-text');
+    startWave();
+  } catch (err) {
+    showError('Microphone access denied. Please allow microphone permission.');
+  }
+}
+
+async function stopRecording() {
+  if (!state.recording) return;
+  state.recording = false;
+  micBtn.classList.remove('active');
+  micBtnWrap.classList.remove('recording');
+  stopWave();
+  micStatus.textContent = 'Processing audio...';
+
+  return new Promise(resolve => {
+    state.mediaRecorder.onstop = async () => {
+      const blob = new Blob(state.audioChunks, { type: 'audio/webm' });
+      state.stream.getTracks().forEach(t => t.stop());
+
+      if (blob.size < 1000) {
+        micStatus.textContent = 'Hold to speak your symptoms';
+        transcriptBox.textContent = 'Speak your symptoms in any language...';
+        resolve();
+        return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Audio = reader.result.split(',')[1];
+        await transcribeAudio(base64Audio, blob.type);
+        resolve();
+      };
+      reader.readAsDataURL(blob);
+    };
+    state.mediaRecorder.stop();
+  });
+}
+
+// ─── Transcribe via Gemini ───────────────────────────────
+async function transcribeAudio(base64Audio, mimeType) {
+  const apiKey = apiKeyInput.value.trim();
+  if (!apiKey) {
+    micStatus.textContent = 'Hold to speak your symptoms';
+    transcriptBox.textContent = 'Please enter your Gemini API key in the sidebar.';
+    transcriptBox.classList.add('has-text');
+    return;
+  }
+
+  const lang = langSelect.value;
+  const langHint = lang ? `The audio is likely in ${lang} language.` : '';
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            {
+              inline_data: {
+                mime_type: mimeType || 'audio/webm',
+                data: base64Audio
+              }
+            },
+            {
+              text: `Transcribe the following audio accurately. The speaker is describing medical symptoms. ${langHint} Return ONLY the transcription, nothing else. If the audio is in a non-English language, transcribe it in the original language followed by an English translation in parentheses.`
+            }
+          ]
+        }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 512 }
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      transcriptBox.textContent = `Error: ${data.error.message}`;
+      transcriptBox.classList.add('has-text');
+      micStatus.textContent = 'Hold to speak your symptoms';
+      return;
+    }
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    state.transcript = text.trim();
+    transcriptBox.textContent = state.transcript || 'Could not transcribe. Try again.';
+    transcriptBox.classList.add('has-text');
+    analyzeBtn.disabled = !state.transcript;
+    micStatus.textContent = 'Transcription complete — analyze when ready';
+
+  } catch (err) {
+    transcriptBox.textContent = 'Network error. Check your API key and connection.';
+    transcriptBox.classList.add('has-text');
+    micStatus.textContent = 'Hold to speak your symptoms';
+  }
+}
+
+// ─── Analyze symptoms ─────────────────────────────────────
+analyzeBtn.addEventListener('click', analyzeSymptoms);
+
+async function analyzeSymptoms() {
+  const apiKey = apiKeyInput.value.trim();
+  if (!apiKey || !state.transcript) return;
+
+  analyzeBtn.disabled = true;
+  analyzeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Analyzing...';
+
+  emptyState.style.display = 'none';
+  resultContent.style.display = 'block';
+  resultContent.innerHTML = '<div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+
+  const prompt = `You are an expert medical AI assistant. A patient has described their symptoms. Analyze and respond ONLY in valid JSON.
+
+Patient's symptom description: "${state.transcript}"
+
+Return this exact JSON structure:
+{
+  "detectedLanguage": "language name",
+  "conditionName": "most likely condition",
+  "alternativeConditions": ["condition2", "condition3"],
+  "severity": "mild|moderate|severe",
+  "severityReason": "brief explanation",
+  "medicines": [
+    { "name": "medicine name", "type": "tablet/syrup/cream/etc", "dosage": "dosage instructions", "icon": "💊" },
+    { "name": "medicine name", "type": "type", "dosage": "instructions", "icon": "🩺" }
+  ],
+  "precautions": [
+    "precaution 1",
+    "precaution 2",
+    "precaution 3",
+    "precaution 4"
+  ],
+  "whenToSeeDoctor": "specific symptoms that require urgent medical attention",
+  "homeRemedies": ["remedy 1", "remedy 2"],
+  "dietAdvice": "brief dietary recommendations"
+}
+
+IMPORTANT: Return ONLY valid JSON, no markdown, no explanation. Be specific and clinically accurate.`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 2048, responseMimeType: 'application/json' }
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      showError(data.error.message);
+      return;
+    }
+
+    let jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    jsonText = jsonText.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(jsonText);
+    renderResult(result);
+    addHistory(result, state.transcript);
+
+  } catch (err) {
+    showError('Failed to analyze symptoms. Please check your API key.');
+  } finally {
+    analyzeBtn.disabled = false;
+    analyzeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M11 8v6M8 11h6"/></svg> Analyze Symptoms';
+  }
+}
+
+// ─── Render result ────────────────────────────────────────
+function renderResult(r) {
+  const severityClass = { mild: 'severity-mild', moderate: 'severity-moderate', severe: 'severity-severe' }[r.severity] || 'severity-mild';
+  const severityLabel = { mild: '✦ Mild', moderate: '⚠ Moderate', severe: '⛔ Severe' }[r.severity] || r.severity;
+
+  const medHTML = (r.medicines || []).map(m => `
+    <li class="medicine-item">
+      <div class="med-icon">${m.icon || '💊'}</div>
+      <div>
+        <div class="med-name">${m.name} <span style="font-weight:400;color:var(--text-muted);font-size:11px;">(${m.type})</span></div>
+        <div class="med-dosage">${m.dosage}</div>
+      </div>
+    </li>
+  `).join('');
+
+  const precHTML = (r.precautions || []).map(p => `
+    <li class="precaution-item"><span class="prec-dot"></span>${p}</li>
+  `).join('');
+
+  const homeHTML = (r.homeRemedies || []).map(p => `
+    <li class="precaution-item"><span class="prec-dot" style="background:var(--green)"></span>${p}</li>
+  `).join('');
+
+  const altHTML = (r.alternativeConditions || []).map(c =>
+    `<span class="condition-badge" style="font-size:11px;">${c}</span>`
+  ).join('');
+
+  resultContent.innerHTML = `
+    <div class="result-card">
+      <div class="result-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;">
+            <span class="lang-detected">🌐 ${r.detectedLanguage || 'Auto-detected'}</span>
+            <span class="severity-badge ${severityClass}">${severityLabel}</span>
+          </div>
+          <h2 class="result-title">${r.conditionName}</h2>
+          <p class="result-subtitle">${r.severityReason || ''}</p>
+          ${altHTML ? `<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.75rem;">${altHTML}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card info-card-full">
+          <div class="info-card-label">
+            <span class="label-icon label-icon-blue">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+            </span>
+            Recommended medicines
+          </div>
+          <ul class="medicine-list">${medHTML || '<li style="font-size:13px;color:var(--text-muted);">Consult a doctor for medication</li>'}</ul>
+        </div>
+
+        <div class="info-card info-card-full">
+          <div class="info-card-label">
+            <span class="label-icon label-icon-green">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            Precautions to follow
+          </div>
+          <ul class="precaution-list">${precHTML}</ul>
+        </div>
+
+        ${homeHTML ? `
+        <div class="info-card">
+          <div class="info-card-label">
+            <span class="label-icon label-icon-purple">🌿</span>
+            Home remedies
+          </div>
+          <ul class="precaution-list">${homeHTML}</ul>
+        </div>` : ''}
+
+        ${r.dietAdvice ? `
+        <div class="info-card">
+          <div class="info-card-label">
+            <span class="label-icon label-icon-amber">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
+            </span>
+            Diet advice
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">${r.dietAdvice}</p>
+        </div>` : ''}
+
+        ${r.whenToSeeDoctor ? `
+        <div class="info-card info-card-full" style="border-color:rgba(248,113,113,0.25);">
+          <div class="info-card-label">
+            <span class="label-icon label-icon-red">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </span>
+            When to see a doctor urgently
+          </div>
+          <p style="font-size:13px;color:var(--red);line-height:1.6;">${r.whenToSeeDoctor}</p>
+        </div>` : ''}
+      </div>
+
+      <div class="disclaimer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span><strong>Medical Disclaimer:</strong> This AI analysis is for informational purposes only and does not replace professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for medical concerns. In case of emergency, call your local emergency services immediately.</span>
+      </div>
+    </div>
+  `;
+}
+
+// ─── History ──────────────────────────────────────────────
+function addHistory(result, transcript) {
+  const entry = {
+    id: Date.now(),
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    condition: result.conditionName,
+    transcript: transcript.substring(0, 60) + (transcript.length > 60 ? '...' : ''),
+    result,
+    fullTranscript: transcript
+  };
+  state.history.unshift(entry);
+  renderHistory();
+}
+
+function renderHistory() {
+  if (!state.history.length) {
+    historyList.innerHTML = '<div class="history-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><p style="font-size:12px;">No sessions yet</p></div>';
+    return;
+  }
+  historyList.innerHTML = state.history.map(e => `
+    <div class="history-item" onclick="loadHistory(${e.id})">
+      <div class="history-item-time">${e.time}</div>
+      <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px;">${e.condition}</div>
+      <div class="history-item-symptom">${e.transcript}</div>
+    </div>
+  `).join('');
+}
+
+function loadHistory(id) {
+  const entry = state.history.find(e => e.id === id);
+  if (!entry) return;
+  state.transcript = entry.fullTranscript;
+  transcriptBox.textContent = entry.fullTranscript;
+  transcriptBox.classList.add('has-text');
+  analyzeBtn.disabled = false;
+  emptyState.style.display = 'none';
+  resultContent.style.display = 'block';
+  renderResult(entry.result);
+  resultsArea.scrollTop = 0;
+}
+
+// ─── Clear ────────────────────────────────────────────────
+clearBtn.addEventListener('click', () => {
+  state.transcript = '';
+  transcriptBox.textContent = 'Speak your symptoms in any language...';
+  transcriptBox.classList.remove('has-text');
+  analyzeBtn.disabled = true;
+  micStatus.textContent = 'Hold to speak your symptoms';
+  emptyState.style.display = 'flex';
+  resultContent.style.display = 'none';
+  resultContent.innerHTML = '';
+});
+
+// ─── Error display ────────────────────────────────────────
+function showError(msg) {
+  resultContent.innerHTML = `
+    <div style="padding:2rem;text-align:center;">
+      <div style="color:var(--red);font-size:14px;margin-bottom:0.5rem;">⚠ Error</div>
+      <div style="font-size:13px;color:var(--text-muted);">${msg}</div>
+    </div>`;
+}
+
+// ─── Allow click to toggle recording too ─────────────────
+let holdTimer = null;
+micBtn.addEventListener('click', (e) => {
+  if (!state.recording) {
+    // handled by mousedown already, but for mobile tap without hold:
+  }
+});
+
+</script>
+</body>
+</html>
